@@ -1,14 +1,15 @@
 import mongoose from 'mongoose';
 import ENVIRONMENT from './environment.config.js';
 
-const connectMongoDB = async () => {
+export const connectMongoDB = async () => {
     try {
-        await mongoose.connect(ENVIRONMENT.MONGO_DB_CONNECTION_STRING, {
+
+        const conn = await mongoose.connect(ENVIRONMENT.MONGO_DB_CONNECTION_STRING, {
             dbName: ENVIRONMENT.MONGO_DB_NAME
         });
+        console.log(`🟢 MongoDB Conectado`);
     } catch (error) {
-        console.error("Error al conectar a MongoDB:", error);
-        process.exit(1);
+        console.error(`🔴 Error en MongoDB: ${error.message}`);
     }
 };
 
