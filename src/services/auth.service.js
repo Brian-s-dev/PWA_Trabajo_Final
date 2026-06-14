@@ -10,7 +10,7 @@ class AuthService {
 
         const userExists = await userRepository.findUserByEmail(email);
         if (userExists) {
-            throw new ServerError('El email ya está registrado', 400); // Usamos nuestro Helper
+            throw new ServerError('El email ya está registrado', 400);
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -19,7 +19,7 @@ class AuthService {
         const newUser = await userRepository.createUser({
             nombre, email,
             password: hashedPassword,
-            rol: rol || 'EMPLOYEE',
+            rol: rol,
             verificationToken
         });
 
