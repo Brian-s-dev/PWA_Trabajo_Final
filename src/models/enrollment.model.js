@@ -1,12 +1,12 @@
 import mongoose from 'mongoose';
 
 const enrollmentSchema = new mongoose.Schema({
-    empleado_id: {
+    empleado: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    curso_id: {
+    curso: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course',
         required: true
@@ -16,22 +16,10 @@ const enrollmentSchema = new mongoose.Schema({
         enum: ['PENDIENTE', 'EN_PROGRESO', 'COMPLETADO'],
         default: 'PENDIENTE'
     },
-    modulos_vistos: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Module'
-        }
-    ],
-    fecha_asignacion: {
-        type: Date,
-        default: Date.now
-    },
-    fecha_finalizacion: {
-        type: Date,
-        default: null
-    }
-}, {
-    timestamps: true
-});
+    modulosCompletados: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Module'
+    }]
+}, { timestamps: true });
 
 export default mongoose.model('Enrollment', enrollmentSchema);
