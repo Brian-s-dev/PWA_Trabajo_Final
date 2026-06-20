@@ -5,12 +5,12 @@ class EnrollmentRepository {
         return await Enrollment.create(data);
     }
 
-    async findByUserAndCourse(empleadoId, cursoId) {
-        return await Enrollment.findOne({ empleado: empleadoId, curso: cursoId });
+    async findByUserAndCourse(employee_id, course_id) {
+        return await Enrollment.findOne({ empleado: employee_id, curso: course_id });
     }
 
-    async findByUserId(empleadoId) {
-        return await Enrollment.find({ empleado: empleadoId }).populate('curso');
+    async findByUserId(employee_id) {
+        return await Enrollment.find({ empleado: employee_id }).populate('curso');
     }
 
     async findById(id) {

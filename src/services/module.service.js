@@ -4,15 +4,17 @@ import ServerError from '../helpers/serverError.helper.js';
 
 class ModuleService {
 
-    async createModule(courseId, moduleData, user) {
+    async createModule(course_id, moduleData, user) {
         if (user.rol !== 'ADMIN') {
             throw new ServerError('No tienes permisos para crear módulos', 403);
         }
 
-        const course = await courseRepository.findById(courseId);
+        const course = await courseRepository.findById(course_id);
         if (!course || !course.activo) {
             throw new ServerError('El curso especificado no existe', 404);
         }
+
+        moduleData.curso_id = course_id;
 
         const newModule = await moduleRepository.create(moduleData);
 
@@ -21,6 +23,10 @@ class ModuleService {
         await course.save();
 
         return newModule;
+    }
+
+    async getModulesBycourse_id(course_id) {
+        return await moduleRepository.findBycourse_id(course_id);
     }
 
     async updateModule(id, updateData, user) {

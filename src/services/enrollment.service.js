@@ -2,43 +2,48 @@ import enrollmentRepository from '../repositories/enrollment.repository.js';
 import courseRepository from '../repositories/course.repository.js';
 import userRepository from '../repositories/user.repository.js';
 import ServerError from '../helpers/serverError.helper.js';
+import { ENROLLMENT_STATUS } from '../constants/enrollmentStatus.constant.js';
 
 class EnrollmentService {
 
-    async assignCourse(empleadoId, cursoId, user) {
+    async assignCourse(employee_id, course_id, user) {
         if (user.rol !== 'ADMIN') {
             throw new ServerError('Solo los administradores pueden asignar cursos', 403);
         }
 
-        const course = await courseRepository.findById(cursoId);
+        const course = await courseRepository.findById(course_id);
         if (!course) throw new ServerError('El curso no existe', 404);
 
-        const employee = await userRepository.findUserById(empleadoId);
+        const employee = await userRepository.findUserById(employee_id);
         if (!employee) throw new ServerError('El empleado no existe', 404);
 
-        const existingEnrollment = await enrollmentRepository.findByUserAndCourse(empleadoId, cursoId);
+        const existingEnrollment = await enrollmentRepository.findByUserAndCourse(employee_id, course_id);
         if (existingEnrollment) {
             throw new ServerError('El empleado ya está inscrito en este curso', 400);
         }
 
-        return await enrollmentRepository.create({ empleado: empleadoId, curso: cursoId });
+        return await enrollmentRepository.create({ empleado: employee_id, curso: course_id });
     }
 
     async getMyCourses(user) {
         return await enrollmentRepository.findByUserId(user.id);
     }
 
-    async markModuleCompleted(enrollmentId, moduleId, user) {
-        const enrollment = await enrollmentRepository.findById(enrollmentId);
+    async getEnrollmentsByCourse(course_id) {
+        return await enrollmentRepository.findBycourse_id(course_id);
+    }
+
+    async getEnrollmentsByEmployee(employee_id) {
+        return await enrollmentRepository.findByEmployeeId(employee_id);
+    }
+
+    async markModuleCompleted(course_id, module_id, user) {
+        const enrollment = await enrollmentRepository.findByUserAndCourse(user.id, course_id);
         if (!enrollment) throw new ServerError('Inscripción no encontrada', 404);
 
-        if (enrollment.empleado.toString() !== user.id) {
-            throw new ServerError('No tienes permiso para modificar este progreso', 403);
-        }
-
-        if (!enrollment.modulosCompletados.includes(moduleId)) {
-            enrollment.modulosCompletados.push(moduleId);
-            enrollment.estado = 'EN_PROGRESO';
+        if (!enrollment.modulosCompletados.includes(module_id)) {
+            enrollment.modulosCompletados.push(module_id);
+            enrollment.estado = ENROLLMENT_STATUS.EN_PROGRESO;
             await enrollment.save();
         }
 

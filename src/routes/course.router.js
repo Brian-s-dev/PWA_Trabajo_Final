@@ -17,6 +17,6 @@ courseRouter.put('/:id', verifyCourseExists, courseController.updateCourse);
 
 courseRouter.delete('/:id', verifyCourseExists, courseController.deleteCourse);
 
-courseRouter.use('/:course_id/modules', moduleRouter);
+courseRouter.use('/:course_id/modules', verifyCourseExists, moduleRouter);
 
 export default courseRouter;
