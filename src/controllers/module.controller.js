@@ -4,9 +4,11 @@ class ModuleController {
 
     async createModule(request, response, next) {
         try {
-            const { courseId } = request.params;
+            const { course_id } = request.params;
 
-            const newModule = await moduleService.createModule(courseId, request.body, request.user);
+            const moduleData = request.body;
+
+            const newModule = await moduleService.createModule(course_id, moduleData);
 
             response.status(201).json({
                 ok: true,
@@ -20,8 +22,11 @@ class ModuleController {
 
     async updateModule(request, response, next) {
         try {
-            const { id } = request.params;
-            const updatedModule = await moduleService.updateModule(id, request.body, request.user);
+            const { module_id } = request.params;
+
+            const moduleData = request.body;
+
+            const updatedModule = await moduleService.updateModule(module_id, moduleData, request.user);
 
             response.status(200).json({
                 ok: true,
@@ -35,8 +40,9 @@ class ModuleController {
 
     async deleteModule(request, response, next) {
         try {
-            const { id } = request.params;
-            await moduleService.deleteModule(id, request.user);
+            const { module_id } = request.params;
+
+            await moduleService.deleteModule(module_id, request.user);
 
             response.status(200).json({ ok: true, message: 'Módulo eliminado' });
         } catch (error) {

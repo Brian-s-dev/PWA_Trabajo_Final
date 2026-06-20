@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { MODELS } from '../constants/models.constant.js';
 
 const courseSchema = new mongoose.Schema({
     titulo: {
@@ -12,12 +13,12 @@ const courseSchema = new mongoose.Schema({
     modulos: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Module'
+            ref: MODELS.MODULE
         }
     ],
     creadoPor: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: MODELS.USER,
         required: true
     },
     activo: {
@@ -28,4 +29,4 @@ const courseSchema = new mongoose.Schema({
     timestamps: true
 });
 
-export default mongoose.model('Course', courseSchema);
+export default mongoose.model(MODELS.COURSE, courseSchema);

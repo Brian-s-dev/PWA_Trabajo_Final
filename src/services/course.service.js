@@ -1,10 +1,11 @@
 import courseRepository from '../repositories/course.repository.js';
 import ServerError from '../helpers/serverError.helper.js';
+import { ROLES } from '../constants/roles.constant.js';
 
 class CourseService {
 
     async createCourse(courseData, user) {
-        if (user.rol !== 'ADMIN') {
+        if (user.rol !== ROLES.ADMIN) {
             throw new ServerError('No tienes permisos para crear cursos', 403);
         }
 
@@ -28,7 +29,7 @@ class CourseService {
     }
 
     async updateCourse(id, updateData, user) {
-        if (user.rol !== 'ADMIN') {
+        if (user.rol !== ROLES.ADMIN) {
             throw new ServerError('No tienes permisos para modificar cursos', 403);
         }
 
@@ -41,7 +42,7 @@ class CourseService {
     }
 
     async deleteCourse(id, user) {
-        if (user.rol !== 'ADMIN') {
+        if (user.rol !== ROLES.ADMIN) {
             throw new ServerError('No tienes permisos para eliminar cursos', 403);
         }
 

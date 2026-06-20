@@ -1,4 +1,6 @@
+import { MODELS } from '../constants/models.constant.js';
 import mongoose from 'mongoose';
+import { ROLES } from '../constants/roles.constant.js';
 
 const userSchema = new mongoose.Schema({
     nombre: {
@@ -21,8 +23,8 @@ const userSchema = new mongoose.Schema({
     },
     rol: {
         type: String,
-        enum: ['ADMIN', 'EMPLOYEE'],
-        default: 'EMPLOYEE'
+        enum: [ROLES.ADMIN, ROLES.EMPLOYEE],
+        default: ROLES.EMPLOYEE
     },
     activo: {
         type: Boolean,
@@ -32,4 +34,4 @@ const userSchema = new mongoose.Schema({
     timestamps: true
 });
 
-export default mongoose.model('User', userSchema);
+export default mongoose.model(MODELS.USER, userSchema);
