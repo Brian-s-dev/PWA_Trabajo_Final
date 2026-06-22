@@ -54,7 +54,7 @@ class ModuleController {
         try {
             const { course_id } = request.params;
 
-            const modules = await moduleService.getModulesByC   ourseId(course_id);
+            const modules = await moduleService.getModulesByCourseId(course_id);
 
             response.status(200).json({
                 ok: true,
