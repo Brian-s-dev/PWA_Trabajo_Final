@@ -8,7 +8,6 @@ const userRouter = express.Router();
 
 userRouter.use(authMiddleware);
 
-// Solo admin y superadmin pueden gestionar usuarios
 userRouter.use(roleMiddleware([ROLES.ADMIN, ROLES.SUPERADMIN]));
 
 userRouter.get('/', userController.getAllUsers);

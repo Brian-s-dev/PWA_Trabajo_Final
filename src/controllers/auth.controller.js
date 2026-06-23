@@ -57,7 +57,6 @@ class AuthController {
 
     async getMe(request, response, next) {
         try {
-            // El usuario ya viene validado por el middleware de autenticación
             response.status(200).json({
                 ok: true,
                 data: request.user
@@ -85,7 +84,7 @@ class AuthController {
         try {
             const { email } = request.body;
             await authService.forgotPassword(email);
-            
+
             response.status(200).json({
                 ok: true,
                 message: 'Si el correo existe, se enviará un enlace de recuperación.'

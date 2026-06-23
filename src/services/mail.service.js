@@ -26,7 +26,26 @@ class MailService {
     }
 
     async sendResetPasswordEmail(email, resetUrl) {
-        // Para cuando implementemos el forgot password
+        try {
+            const mailOptions = {
+                from: ENVIRONMENT.GMAIL_USERNAME,
+                to: email,
+                subject: '🔑 Recuperación de Contraseña',
+                html: `
+                    <div style="font-family: Arial, sans-serif; padding: 20px; text-align: center;">
+                        <h2>Recuperación de Contraseña</h2>
+                        <p>Hemos recibido una solicitud para restablecer tu contraseña. Si no fuiste tú, puedes ignorar este correo.</p>
+                        <p>Para crear una nueva contraseña, haz clic en el siguiente enlace (válido por 1 hora):</p>
+                        <a href="${resetUrl}" style="display: inline-block; padding: 10px 20px; margin: 20px 0; background-color: #dc3545; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer Contraseña</a>
+                    </div>
+                `
+            };
+
+            await transporter.sendMail(mailOptions);
+            console.log(`🟢 Correo de recuperación enviado a: ${email}`);
+        } catch (error) {
+            console.error('🔴 Error al enviar el correo de recuperación:', error);
+        }
     }
 }
 

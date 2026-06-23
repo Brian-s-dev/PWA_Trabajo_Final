@@ -61,9 +61,8 @@ class CourseService {
             throw new ServerError('Curso no encontrado', 404);
         }
 
-        // Desactivar o eliminar todos los módulos vinculados a este curso
         if (deletedCourse.modulos && deletedCourse.modulos.length > 0) {
-            await Promise.all(deletedCourse.modulos.map(moduleId => 
+            await Promise.all(deletedCourse.modulos.map(moduleId =>
                 isHardDelete ? moduleRepository.hardDeleteById(moduleId) : moduleRepository.deleteById(moduleId)
             ));
         }

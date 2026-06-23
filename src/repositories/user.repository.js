@@ -18,7 +18,7 @@ class UserRepository {
     }
 
     async findAllUsers(query = {}) {
-        // Find users based on query (e.g. search by name regex), ensuring they are active
+        // PREGUNTAR POR SINTAXIS 
         const filter = { activo: true };
         if (query.search) {
             filter.$or = [
@@ -28,6 +28,24 @@ class UserRepository {
         }
         return await User.find(filter).select('-password');
     }
+
+    /* async findAllUsers(query = {}) {
+        let users = await User.find({ activo: true }).select('-password');
+
+        if (query.search) {
+            
+            const terminoDeBusqueda = query.search.toLowerCase();
+
+            users = users.filter(usuario => {
+                
+                const nombreUsuario = usuario.nombre.toLowerCase();
+                const emailUsuario = usuario.email.toLowerCase();
+
+                return nombreUsuario.includes(terminoDeBusqueda) || emailUsuario.includes(terminoDeBusqueda);
+            });
+        }
+        return users;
+    } */
 
     async deleteById(id) {
         return await User.findByIdAndUpdate(id, { activo: false }, { new: true });

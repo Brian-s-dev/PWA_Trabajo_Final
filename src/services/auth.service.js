@@ -126,8 +126,12 @@ class AuthService {
         }
 
         const updatedUser = await userRepository.updateById(id, updateData);
-        updatedUser.password = undefined; // hide password
-        return updatedUser;
+
+        const safeUser = updatedUser.toObject();
+
+        delete safeUser.password; // PREGUNTAR delete password
+        return safeUser;
+
     }
 }
 
