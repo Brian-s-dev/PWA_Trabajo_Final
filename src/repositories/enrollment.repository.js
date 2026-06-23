@@ -5,12 +5,20 @@ class EnrollmentRepository {
         return await Enrollment.create(data);
     }
 
-    async findByUserAndCourse(employee_id, course_id) {
-        return await Enrollment.findOne({ employee: employee_id, course: course_id });
+    async findByUserAndCourse(empleado_id, curso_id) {
+        return await Enrollment.findOne({ empleado: empleado_id, curso: curso_id });
     }
 
-    async findByUserId(employee_id) {
-        return await Enrollment.find({ employee: employee_id }).populate('course');
+    async findByUserId(empleado_id) {
+        return await Enrollment.find({ empleado: empleado_id }).populate('curso').populate('modulosCompletados');
+    }
+
+    async findByCursoId(curso_id) {
+        return await Enrollment.find({ curso: curso_id }).populate('empleado', 'nombre email');
+    }
+
+    async findByEmpleadoId(empleado_id) {
+        return await Enrollment.find({ empleado: empleado_id }).populate('curso').populate('modulosCompletados');
     }
 
     async findById(id) {

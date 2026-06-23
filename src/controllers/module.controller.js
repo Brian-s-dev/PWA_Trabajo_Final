@@ -41,10 +41,11 @@ class ModuleController {
     async deleteModule(request, response, next) {
         try {
             const { module_id } = request.params;
+            const isHardDelete = request.query.hard === 'true';
 
-            await moduleService.deleteModule(module_id, request.user);
+            await moduleService.deleteModule(module_id, request.user, isHardDelete);
 
-            response.status(200).json({ ok: true, message: 'Módulo eliminado' });
+            response.status(200).json({ ok: true, message: isHardDelete ? 'Módulo eliminado físicamente' : 'Módulo eliminado' });
         } catch (error) {
             next(error);
         }

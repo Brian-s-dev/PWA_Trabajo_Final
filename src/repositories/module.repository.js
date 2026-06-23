@@ -20,6 +20,10 @@ class ModuleRepository {
     async deleteById(id) {
         return await Module.findByIdAndUpdate(id, { activo: false }, { new: true });
     }
+
+    async hardDeleteById(id) {
+        return await Module.findByIdAndDelete(id);
+    }
 }
 
 export default new ModuleRepository();

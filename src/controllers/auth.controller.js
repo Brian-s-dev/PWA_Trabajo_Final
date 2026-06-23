@@ -4,9 +4,9 @@ class AuthController {
 
     async register(request, response, next) {
         try {
-            const { nombre, email, password, rol } = request.body;
+            const { nombre, email, password } = request.body;
 
-            const newUser = await authService.register(nombre, email, password, rol);
+            const newUser = await authService.register(nombre, email, password);
 
             return response.status(201).json({
                 ok: true,
@@ -49,6 +49,60 @@ class AuthController {
                 ok: true,
                 message: "Inicio de sesión exitoso",
                 data: data
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getMe(request, response, next) {
+        try {
+            // El usuario ya viene validado por el middleware de autenticación
+            response.status(200).json({
+                ok: true,
+                data: request.user
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async updateMe(request, response, next) {
+        try {
+            const updatedUser = await authService.updateMe(request.user.id, request.body);
+
+            response.status(200).json({
+                ok: true,
+                message: 'Perfil actualizado exitosamente',
+                data: updatedUser
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async forgotPassword(request, response, next) {
+        try {
+            const { email } = request.body;
+            await authService.forgotPassword(email);
+            
+            response.status(200).json({
+                ok: true,
+                message: 'Si el correo existe, se enviará un enlace de recuperación.'
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async resetPassword(request, response, next) {
+        try {
+            const { reset_token, new_password } = request.body;
+            await authService.resetPassword(reset_token, new_password);
+
+            response.status(200).json({
+                ok: true,
+                message: 'Contraseña restablecida exitosamente.'
             });
         } catch (error) {
             next(error);

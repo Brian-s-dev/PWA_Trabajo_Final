@@ -20,9 +20,7 @@ class EnrollmentController {
 
     async getMyCourses(request, response, next) {
         try {
-            const { user_id } = request.params;
-
-            const enrollments = await enrollmentService.getMyCourses(user_id);
+            const enrollments = await enrollmentService.getMyCourses(request.user);
 
             response.status(200).json({
                 ok: true,

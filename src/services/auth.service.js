@@ -4,10 +4,11 @@ import ENVIRONMENT from '../config/environment.config.js';
 import ServerError from '../helpers/serverError.helper.js';
 import userRepository from '../repositories/user.repository.js';
 import mailService from './mail.service.js';
+import { ROLES } from '../constants/roles.constant.js';
 
 class AuthService {
 
-    async register(nombre, email, password, rol) {
+    async register(nombre, email, password) {
         const userExists = await userRepository.findUserByEmail(email);
         if (userExists) {
             throw new ServerError("El usuario ya existe", 400);
@@ -20,7 +21,7 @@ class AuthService {
             email,
             password: hashedPassword,
             email_verificado: false,
-            rol: rol
+            rol: ROLES.EMPLOYEE
         });
 
         const verificationToken = jwt.sign(
@@ -56,6 +57,7 @@ class AuthService {
             { expiresIn: '7d' }
         );
 
+        user.password = undefined;
         return { user, access_token };
     }
 
@@ -109,6 +111,23 @@ class AuthService {
         });
 
         return user;
+    }
+
+    async updateMe(id, updateData) {
+        const user = await userRepository.findUserById(id);
+        if (!user) throw new ServerError("Usuario no encontrado", 404);
+
+        if (updateData.email) {
+            throw new ServerError("No puedes cambiar tu email por seguridad", 400);
+        }
+
+        if (updateData.password) {
+            updateData.password = await bcrypt.hash(updateData.password, 10);
+        }
+
+        const updatedUser = await userRepository.updateById(id, updateData);
+        updatedUser.password = undefined; // hide password
+        return updatedUser;
     }
 }
 

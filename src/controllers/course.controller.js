@@ -61,11 +61,12 @@ class CourseController {
     async deleteCourse(request, response, next) {
         try {
             const { id } = request.params;
-            await courseService.deleteCourse(id, request.user);
+            const isHardDelete = request.query.hard === 'true';
+            await courseService.deleteCourse(id, request.user, isHardDelete);
 
             response.status(200).json({
                 ok: true,
-                message: 'Curso eliminado exitosamente'
+                message: isHardDelete ? 'Curso eliminado físicamente' : 'Curso eliminado exitosamente'
             });
         } catch (error) {
             next(error);

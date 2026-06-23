@@ -20,6 +20,10 @@ class CourseRepository {
     async deleteById(id) {
         return await Course.findByIdAndUpdate(id, { activo: false }, { new: true });
     }
+
+    async hardDeleteById(id) {
+        return await Course.findByIdAndDelete(id);
+    }
 }
 
 export default new CourseRepository();

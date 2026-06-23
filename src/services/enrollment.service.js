@@ -3,11 +3,12 @@ import courseRepository from '../repositories/course.repository.js';
 import userRepository from '../repositories/user.repository.js';
 import ServerError from '../helpers/serverError.helper.js';
 import { ENROLLMENT_STATUS } from '../constants/enrollmentStatus.constant.js';
+import { ROLES } from '../constants/roles.constant.js';
 
 class EnrollmentService {
 
     async assignCourse(employee_id, course_id, user) {
-        if (user.rol !== 'ADMIN') {
+        if (user.rol !== ROLES.ADMIN && user.rol !== ROLES.SUPERADMIN) {
             throw new ServerError('Solo los administradores pueden asignar cursos', 403);
         }
 
@@ -30,20 +31,33 @@ class EnrollmentService {
     }
 
     async getEnrollmentsByCourse(course_id) {
-        return await enrollmentRepository.findBycourse_id(course_id);
+        return await enrollmentRepository.findByCursoId(course_id);
     }
 
     async getEnrollmentsByEmployee(employee_id) {
-        return await enrollmentRepository.findByEmployeeId(employee_id);
+        return await enrollmentRepository.findByEmpleadoId(employee_id);
     }
 
     async markModuleCompleted(course_id, module_id, user) {
         const enrollment = await enrollmentRepository.findByUserAndCourse(user.id, course_id);
         if (!enrollment) throw new ServerError('Inscripción no encontrada', 404);
 
+        const course = await courseRepository.findById(course_id);
+        if (!course) throw new ServerError('Curso no encontrado', 404);
+
+        if (!course.modulos.includes(module_id)) {
+            throw new ServerError('El módulo no pertenece a este curso', 400);
+        }
+
         if (!enrollment.modulosCompletados.includes(module_id)) {
             enrollment.modulosCompletados.push(module_id);
-            enrollment.estado = ENROLLMENT_STATUS.EN_PROGRESO;
+
+            if (enrollment.modulosCompletados.length >= course.modulos.length) {
+                enrollment.estado = ENROLLMENT_STATUS.COMPLETADO;
+            } else {
+                enrollment.estado = ENROLLMENT_STATUS.EN_PROGRESO;
+            }
+
             await enrollment.save();
         }
 

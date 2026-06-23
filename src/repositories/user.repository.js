@@ -16,5 +16,25 @@ class UserRepository {
     async updateById(id, updateData) {
         return await User.findByIdAndUpdate(id, updateData, { new: true });
     }
+
+    async findAllUsers(query = {}) {
+        // Find users based on query (e.g. search by name regex), ensuring they are active
+        const filter = { activo: true };
+        if (query.search) {
+            filter.$or = [
+                { nombre: { $regex: query.search, $options: 'i' } },
+                { email: { $regex: query.search, $options: 'i' } }
+            ];
+        }
+        return await User.find(filter).select('-password');
+    }
+
+    async deleteById(id) {
+        return await User.findByIdAndUpdate(id, { activo: false }, { new: true });
+    }
+
+    async hardDeleteById(id) {
+        return await User.findByIdAndDelete(id);
+    }
 }
 export default new UserRepository();

@@ -1,11 +1,12 @@
 import moduleRepository from '../repositories/module.repository.js';
 import courseRepository from '../repositories/course.repository.js';
 import ServerError from '../helpers/serverError.helper.js';
+import { ROLES } from '../constants/roles.constant.js';
 
 class ModuleService {
 
     async createModule(course_id, moduleData, user) {
-        if (user.rol !== 'ADMIN') {
+        if (user.rol !== ROLES.ADMIN && user.rol !== ROLES.SUPERADMIN) {
             throw new ServerError('No tienes permisos para crear módulos', 403);
         }
 
@@ -25,12 +26,12 @@ class ModuleService {
         return newModule;
     }
 
-    async getModulesBycourse_id(course_id) {
-        return await moduleRepository.findBycourse_id(course_id);
+    async getModulesByCourseId(course_id) {
+        return await moduleRepository.findByCourseId(course_id);
     }
 
     async updateModule(id, updateData, user) {
-        if (user.rol !== 'ADMIN') throw new ServerError('Sin permisos', 403);
+        if (user.rol !== ROLES.ADMIN && user.rol !== ROLES.SUPERADMIN) throw new ServerError('Sin permisos', 403);
 
         const updatedModule = await moduleRepository.updateById(id, updateData);
         if (!updatedModule) throw new ServerError('Módulo no encontrado', 404);
@@ -38,11 +39,27 @@ class ModuleService {
         return updatedModule;
     }
 
-    async deleteModule(id, user) {
-        if (user.rol !== 'ADMIN') throw new ServerError('Sin permisos', 403);
+    async deleteModule(id, user, isHardDelete = false) {
+        if (user.rol !== ROLES.ADMIN && user.rol !== ROLES.SUPERADMIN) throw new ServerError('Sin permisos', 403);
 
-        const deletedModule = await moduleRepository.deleteById(id);
+        let deletedModule;
+        if (isHardDelete) {
+            if (user.rol !== ROLES.SUPERADMIN) {
+                throw new ServerError('Solo un SUPERADMIN puede hacer borrado físico', 403);
+            }
+            deletedModule = await moduleRepository.hardDeleteById(id);
+        } else {
+            deletedModule = await moduleRepository.deleteById(id);
+        }
+
         if (!deletedModule) throw new ServerError('Módulo no encontrado', 404);
+
+        // Remover referencia del curso
+        const course = await courseRepository.findById(deletedModule.curso_id);
+        if (course) {
+            course.modulos.pull(deletedModule._id);
+            await course.save();
+        }
 
         return deletedModule;
     }

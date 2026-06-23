@@ -6,6 +6,7 @@ import { connectMongoDB } from './config/mongodb.config.js';
 import authRouter from './routes/auth.router.js';
 import courseRouter from './routes/course.router.js';
 import enrollmentRouter from './routes/enrollment.router.js';
+import userRouter from './routes/user.router.js';
 import errorHandlerMiddleware from './middlewares/error.middleware.js';
 import moduleRouter from './routes/module.router.js';
 
@@ -27,6 +28,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/courses', courseRouter);
 
 app.use('/api/enrollments', enrollmentRouter);
+
+app.use('/api/users', userRouter);
 
 app.use(errorHandlerMiddleware);
 

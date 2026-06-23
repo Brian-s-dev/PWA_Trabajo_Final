@@ -1,11 +1,12 @@
 import courseRepository from '../repositories/course.repository.js';
+import moduleRepository from '../repositories/module.repository.js';
 import ServerError from '../helpers/serverError.helper.js';
 import { ROLES } from '../constants/roles.constant.js';
 
 class CourseService {
 
     async createCourse(courseData, user) {
-        if (user.rol !== ROLES.ADMIN) {
+        if (user.rol !== ROLES.ADMIN && user.rol !== ROLES.SUPERADMIN) {
             throw new ServerError('No tienes permisos para crear cursos', 403);
         }
 
@@ -29,7 +30,7 @@ class CourseService {
     }
 
     async updateCourse(id, updateData, user) {
-        if (user.rol !== ROLES.ADMIN) {
+        if (user.rol !== ROLES.ADMIN && user.rol !== ROLES.SUPERADMIN) {
             throw new ServerError('No tienes permisos para modificar cursos', 403);
         }
 
@@ -41,14 +42,30 @@ class CourseService {
         return updatedCourse;
     }
 
-    async deleteCourse(id, user) {
-        if (user.rol !== ROLES.ADMIN) {
+    async deleteCourse(id, user, isHardDelete = false) {
+        if (user.rol !== ROLES.ADMIN && user.rol !== ROLES.SUPERADMIN) {
             throw new ServerError('No tienes permisos para eliminar cursos', 403);
         }
 
-        const deletedCourse = await courseRepository.deleteById(id);
+        let deletedCourse;
+        if (isHardDelete) {
+            if (user.rol !== ROLES.SUPERADMIN) {
+                throw new ServerError('Solo un SUPERADMIN puede hacer borrado físico', 403);
+            }
+            deletedCourse = await courseRepository.hardDeleteById(id);
+        } else {
+            deletedCourse = await courseRepository.deleteById(id);
+        }
+
         if (!deletedCourse) {
             throw new ServerError('Curso no encontrado', 404);
+        }
+
+        // Desactivar o eliminar todos los módulos vinculados a este curso
+        if (deletedCourse.modulos && deletedCourse.modulos.length > 0) {
+            await Promise.all(deletedCourse.modulos.map(moduleId => 
+                isHardDelete ? moduleRepository.hardDeleteById(moduleId) : moduleRepository.deleteById(moduleId)
+            ));
         }
 
         return deletedCourse;

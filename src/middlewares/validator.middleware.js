@@ -1,5 +1,5 @@
 export const validateRegisterInput = (request, response, next) => {
-    const { nombre, email, password } = request.body;
+    const { nombre, email, password } = request.body || {};
 
     if (!nombre || !email || !password) {
         return response.status(400).json({ ok: false, message: 'Nombre, email y password son obligatorios.' });
