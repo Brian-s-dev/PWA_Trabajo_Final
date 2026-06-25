@@ -23,7 +23,9 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use(cors());
+app.use(cors({
+    maxAge: 86400 // Cache preflight requests for 24 hours
+}));
 app.use(express.json());
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
