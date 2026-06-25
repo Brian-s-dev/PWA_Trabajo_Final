@@ -1,0 +1,4 @@
+export const MODULE_STATUS = {
+    PENDIENTE: 'PENDIENTE',
+    COMPLETADO: 'COMPLETADO'
+};

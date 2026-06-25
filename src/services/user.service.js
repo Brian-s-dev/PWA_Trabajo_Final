@@ -45,7 +45,7 @@ class UserService {
             { expiresIn: '24h' }
         );
 
-        const verificationUrl = `${ENVIRONMENT.URL_FRONTEND}/api/auth/verify-email?verification_token=${verificationToken}`;
+        const verificationUrl = `${ENVIRONMENT.URL_FRONTEND}/verify-email?verification_token=${verificationToken}`;
 
         await mailService.sendVerificationEmail(email, newUser.nombre, verificationUrl);
 
@@ -53,9 +53,37 @@ class UserService {
         return newUser;
     }
 
+    async updateUser(id, updateData, currentUser) {
+        if (currentUser.rol === ROLES.EMPLOYEE) {
+            throw new ServerError('No tienes permisos', 403);
+        }
+
+        const userToUpdate = await userRepository.findUserById(id);
+        if (!userToUpdate) throw new ServerError('Usuario no encontrado', 404);
+
+        if (updateData.rol && updateData.rol === ROLES.SUPERADMIN && currentUser.rol !== ROLES.SUPERADMIN) {
+            throw new ServerError('Solo un SUPERADMIN puede asignar el rol de SUPERADMIN', 403);
+        }
+        
+        if (userToUpdate.rol === ROLES.SUPERADMIN && currentUser.rol !== ROLES.SUPERADMIN) {
+             throw new ServerError('No puedes modificar a un SUPERADMIN', 403);
+        }
+
+        if (updateData.password) {
+            updateData.password = await bcrypt.hash(updateData.password, 10);
+        }
+
+        const updatedUser = await userRepository.updateById(id, updateData);
+        return updatedUser;
+    }
+
     async deleteUser(id, currentUser, isHardDelete = false) {
         if (currentUser.rol === ROLES.EMPLOYEE) {
             throw new ServerError('No tienes permisos para eliminar usuarios', 403);
+        }
+
+        if (id === currentUser.id) {
+            throw new ServerError('No puedes eliminar tu propia cuenta', 403);
         }
 
         const userToDelete = await userRepository.findUserById(id);

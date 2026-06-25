@@ -18,10 +18,10 @@ const enrollmentSchema = new mongoose.Schema({
         enum: [ENROLLMENT_STATUS.PENDIENTE, ENROLLMENT_STATUS.EN_PROGRESO, ENROLLMENT_STATUS.COMPLETADO],
         default: ENROLLMENT_STATUS.PENDIENTE
     },
-    modulosCompletados: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: MODELS.MODULE
-    }]
+    activo: {
+        type: Boolean,
+        default: true
+    }
 }, { timestamps: true });
 
 export default mongoose.model(MODELS.ENROLLMENT, enrollmentSchema);

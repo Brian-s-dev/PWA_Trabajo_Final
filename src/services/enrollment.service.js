@@ -1,8 +1,10 @@
 import enrollmentRepository from '../repositories/enrollment.repository.js';
 import courseRepository from '../repositories/course.repository.js';
 import userRepository from '../repositories/user.repository.js';
+import enrollmentModuleRepository from '../repositories/enrollmentModule.repository.js';
 import ServerError from '../helpers/serverError.helper.js';
 import { ENROLLMENT_STATUS } from '../constants/enrollmentStatus.constant.js';
+import { MODULE_STATUS } from '../constants/moduleStatus.constant.js';
 import { ROLES } from '../constants/roles.constant.js';
 
 class EnrollmentService {
@@ -20,14 +22,74 @@ class EnrollmentService {
 
         const existingEnrollment = await enrollmentRepository.findByUserAndCourse(employee_id, course_id);
         if (existingEnrollment) {
-            throw new ServerError('El empleado ya está inscrito en este curso', 400);
+            if (existingEnrollment.activo) {
+                throw new ServerError('El empleado ya está inscrito en este curso', 400);
+            } else {
+                existingEnrollment.activo = true;
+                await existingEnrollment.save();
+
+                if (course.modulos && course.modulos.length > 0) {
+                    const existingModules = await enrollmentModuleRepository.findByEnrollmentId(existingEnrollment._id);
+                    const existingModuleIds = existingModules.map(m => m.modulo.toString());
+
+                    const newModulesData = course.modulos
+                        .filter(modId => !existingModuleIds.includes(modId.toString()))
+                        .map(moduloId => ({
+                            enrollment: existingEnrollment._id,
+                            modulo: moduloId,
+                            estado: MODULE_STATUS.PENDIENTE
+                        }));
+
+                    if (newModulesData.length > 0) {
+                        await enrollmentModuleRepository.createMany(newModulesData);
+                    }
+                }
+
+                return existingEnrollment;
+            }
         }
 
-        return await enrollmentRepository.create({ empleado: employee_id, curso: course_id });
+        const newEnrollment = await enrollmentRepository.create({ empleado: employee_id, curso: course_id });
+
+        if (course.modulos && course.modulos.length > 0) {
+            const modulesData = course.modulos.map(moduloId => ({
+                enrollment: newEnrollment._id,
+                modulo: moduloId,
+                estado: MODULE_STATUS.PENDIENTE
+            }));
+            await enrollmentModuleRepository.createMany(modulesData);
+        }
+
+        return newEnrollment;
+    }
+
+    async unassignCourse(employee_id, course_id, user) {
+        if (user.rol !== ROLES.ADMIN && user.rol !== ROLES.SUPERADMIN) {
+            throw new ServerError('Solo los administradores pueden desasignar cursos', 403);
+        }
+
+        const existingEnrollment = await enrollmentRepository.findByUserAndCourse(employee_id, course_id);
+        if (!existingEnrollment || !existingEnrollment.activo) {
+            throw new ServerError('La inscripción no existe o ya está inactiva', 404);
+        }
+
+        existingEnrollment.activo = false;
+        await existingEnrollment.save();
+
+        return existingEnrollment;
     }
 
     async getMyCourses(user) {
-        return await enrollmentRepository.findByUserId(user.id);
+        const enrollments = await enrollmentRepository.findByUserId(user.id);
+        const results = [];
+        for (const enr of enrollments) {
+            if (!enr.curso) continue;
+            const enrObj = enr.toObject();
+            const modulesProgress = await enrollmentModuleRepository.findByEnrollmentId(enr._id);
+            enrObj.moduleProgress = modulesProgress;
+            results.push(enrObj);
+        }
+        return results;
     }
 
     async getEnrollmentsByCourse(course_id) {
@@ -45,20 +107,34 @@ class EnrollmentService {
         const course = await courseRepository.findById(course_id);
         if (!course) throw new ServerError('Curso no encontrado', 404);
 
-        if (!course.modulos.includes(module_id)) {
+        const moduleExistsInCourse = course.modulos.some(mod => mod._id.toString() === module_id.toString());
+        if (!moduleExistsInCourse) {
             throw new ServerError('El módulo no pertenece a este curso', 400);
         }
 
-        if (!enrollment.modulosCompletados.includes(module_id)) {
-            enrollment.modulosCompletados.push(module_id);
+        const enrollmentModule = await enrollmentModuleRepository.findByEnrollmentAndModule(enrollment._id, module_id);
+        if (!enrollmentModule) {
+            throw new ServerError('No se encontró el seguimiento para este módulo', 404);
+        }
 
-            if (enrollment.modulosCompletados.length >= course.modulos.length) {
-                enrollment.estado = ENROLLMENT_STATUS.COMPLETADO;
-            } else {
-                enrollment.estado = ENROLLMENT_STATUS.EN_PROGRESO;
+        if (enrollmentModule.estado !== MODULE_STATUS.COMPLETADO) {
+            await enrollmentModuleRepository.updateById(enrollmentModule._id, {
+                estado: MODULE_STATUS.COMPLETADO,
+                fechaCompletado: new Date()
+            });
+
+            if (enrollment.estado !== ENROLLMENT_STATUS.COMPLETADO) {
+                const allModules = await enrollmentModuleRepository.findByEnrollmentId(enrollment._id);
+                const completedCount = allModules.filter(m => m.estado === MODULE_STATUS.COMPLETADO).length;
+
+                if (completedCount >= course.modulos.length) {
+                    enrollment.estado = ENROLLMENT_STATUS.COMPLETADO;
+                } else {
+                    enrollment.estado = ENROLLMENT_STATUS.EN_PROGRESO;
+                }
+
+                await enrollment.save();
             }
-
-            await enrollment.save();
         }
 
         return enrollment;

@@ -23,6 +23,16 @@ class UserController {
         }
     }
 
+    async updateUser(request, response, next) {
+        try {
+            const { id } = request.params;
+            const updatedUser = await userService.updateUser(id, request.body, request.user);
+            response.status(200).json({ ok: true, message: 'Usuario actualizado exitosamente', data: updatedUser });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async deleteUser(request, response, next) {
         try {
             const { id } = request.params;

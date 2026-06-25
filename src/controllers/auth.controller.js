@@ -57,7 +57,6 @@ class AuthController {
 
     async getMe(request, response, next) {
         try {
-            // El usuario ya viene validado por el middleware de autenticación
             response.status(200).json({
                 ok: true,
                 data: request.user
@@ -81,11 +80,31 @@ class AuthController {
         }
     }
 
+    async updateAvatar(request, response, next) {
+        try {
+            if (!request.file) {
+                return response.status(400).json({ ok: false, message: 'No se subió ninguna imagen' });
+            }
+
+            const avatarUrl = `/uploads/avatars/${request.file.filename}`;
+
+            const updatedUser = await authService.updateAvatar(request.user.id, avatarUrl);
+
+            response.status(200).json({
+                ok: true,
+                message: 'Avatar actualizado exitosamente',
+                data: updatedUser
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async forgotPassword(request, response, next) {
         try {
             const { email } = request.body;
             await authService.forgotPassword(email);
-            
+
             response.status(200).json({
                 ok: true,
                 message: 'Si el correo existe, se enviará un enlace de recuperación.'

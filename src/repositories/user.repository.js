@@ -18,8 +18,10 @@ class UserRepository {
     }
 
     async findAllUsers(query = {}) {
-        // Find users based on query (e.g. search by name regex), ensuring they are active
-        const filter = { activo: true };
+        const filter = {};
+        if (query.includeInactive !== 'true') {
+            filter.activo = true;
+        }
         if (query.search) {
             filter.$or = [
                 { nombre: { $regex: query.search, $options: 'i' } },

@@ -18,6 +18,21 @@ class EnrollmentController {
         }
     }
 
+    async unassignCourse(request, response, next) {
+        try {
+            const { employee_id, course_id } = request.params;
+            const enrollment = await enrollmentService.unassignCourse(employee_id, course_id, request.user);
+
+            response.status(200).json({
+                ok: true,
+                message: 'Inscripción removida exitosamente (soft-delete)',
+                data: enrollment
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async getMyCourses(request, response, next) {
         try {
             const enrollments = await enrollmentService.getMyCourses(request.user);

@@ -38,4 +38,10 @@ enrollmentRouter.put(
     enrollmentController.markModuleCompleted
 );
 
+enrollmentRouter.delete(
+    '/:course_id/employee/:employee_id',
+    roleMiddleware([ROLES.ADMIN, ROLES.SUPERADMIN]),
+    enrollmentController.unassignCourse
+);
+
 export default enrollmentRouter;

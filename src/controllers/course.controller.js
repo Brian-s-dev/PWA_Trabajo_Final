@@ -18,7 +18,7 @@ class CourseController {
 
     async getAllCourses(request, response, next) {
         try {
-            const courses = await courseService.getAllCourses();
+            const courses = await courseService.getAllCourses(request.query);
 
             response.status(200).json({
                 ok: true,

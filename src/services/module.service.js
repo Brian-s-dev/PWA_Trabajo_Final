@@ -54,7 +54,6 @@ class ModuleService {
 
         if (!deletedModule) throw new ServerError('Módulo no encontrado', 404);
 
-        // Remover referencia del curso
         const course = await courseRepository.findById(deletedModule.curso_id);
         if (course) {
             course.modulos.pull(deletedModule._id);

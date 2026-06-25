@@ -5,12 +5,20 @@ class CourseRepository {
         return await Course.create(courseData);
     }
 
-    async findAll() {
-        return await Course.find({ activo: true }).populate('creadoPor', 'nombre email');
+    async findAll(query = {}) {
+        const filter = {};
+        if (query.includeInactive !== 'true') {
+            filter.activo = true;
+        }
+        return await Course.find(filter)
+            .populate('creadoPor', 'nombre email')
+            .populate('modulos', 'titulo activo');
     }
 
     async findById(id) {
-        return await Course.findById(id).populate('creadoPor', 'nombre email');
+        return await Course.findById(id)
+            .populate('creadoPor', 'nombre email')
+            .populate('modulos');
     }
 
     async updateById(id, updateData) {

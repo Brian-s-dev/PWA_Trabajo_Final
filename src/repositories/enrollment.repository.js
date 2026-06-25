@@ -10,19 +10,27 @@ class EnrollmentRepository {
     }
 
     async findByUserId(empleado_id) {
-        return await Enrollment.find({ empleado: empleado_id }).populate('curso').populate('modulosCompletados');
+        return await Enrollment.find({ empleado: empleado_id, activo: true }).populate({
+            path: 'curso',
+            match: { activo: true },
+            populate: { path: 'modulos' }
+        });
     }
 
     async findByCursoId(curso_id) {
-        return await Enrollment.find({ curso: curso_id }).populate('empleado', 'nombre email');
+        return await Enrollment.find({ curso: curso_id, activo: true }).populate('empleado', 'nombre email');
     }
 
     async findByEmpleadoId(empleado_id) {
-        return await Enrollment.find({ empleado: empleado_id }).populate('curso').populate('modulosCompletados');
+        return await Enrollment.find({ empleado: empleado_id, activo: true }).populate({
+            path: 'curso',
+            match: { activo: true },
+            populate: { path: 'modulos' }
+        });
     }
 
     async findById(id) {
-        return await Enrollment.findById(id);
+        return await Enrollment.findOne({ _id: id, activo: true });
     }
 }
 

@@ -30,7 +30,7 @@ class AuthService {
             { expiresIn: '24h' }
         );
 
-        const verificationUrl = `${ENVIRONMENT.URL_FRONTEND}/api/auth/verify-email?verification_token=${verificationToken}`;
+        const verificationUrl = `${ENVIRONMENT.URL_FRONTEND}/verify-email?verification_token=${verificationToken}`;
 
         await mailService.sendVerificationEmail(email, newUser.nombre, verificationUrl);
 
@@ -126,8 +126,22 @@ class AuthService {
         }
 
         const updatedUser = await userRepository.updateById(id, updateData);
-        updatedUser.password = undefined; // hide password
-        return updatedUser;
+
+        const safeUser = updatedUser.toObject();
+
+        delete safeUser.password;
+        return safeUser;
+    }
+
+    async updateAvatar(id, avatarUrl) {
+        const user = await userRepository.findUserById(id);
+        if (!user) throw new ServerError("Usuario no encontrado", 404);
+
+        const updatedUser = await userRepository.updateById(id, { avatar: avatarUrl });
+
+        const safeUser = updatedUser.toObject();
+        delete safeUser.password;
+        return safeUser;
     }
 }
 

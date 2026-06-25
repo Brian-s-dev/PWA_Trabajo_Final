@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema({
         enum: [ROLES.ADMIN, ROLES.EMPLOYEE, ROLES.SUPERADMIN],
         default: ROLES.EMPLOYEE
     },
+    avatar: {
+        type: String,
+        default: null
+    },
     activo: {
         type: Boolean,
         default: true
