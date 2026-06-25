@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import cors from 'cors';
 import dns from 'dns';
 import path from 'path';
@@ -31,6 +32,17 @@ app.get('/api/ping', (req, res) => {
     res.status(200).json({ ok: true, mensaje: '🚀 API LMS Onboarding funcionando' });
 });
 
+if (process.env.VERCEL) {
+    // Middleware para asegurar la conexión en entornos Serverless
+    app.use(async (req, res, next) => {
+        // readyState 1 significa conectado
+        if (mongoose.connection.readyState !== 1) {
+            await connectMongoDB();
+        }
+        next();
+    });
+}
+
 app.use('/api/auth', authRouter);
 
 app.use('/api/courses', courseRouter);
@@ -43,9 +55,8 @@ app.use('/api/stats', statsRouter);
 
 app.use(errorHandlerMiddleware);
 
-if (process.env.VERCEL) {
-    connectMongoDB();
-} else {
+if (!process.env.VERCEL) {
+    // Si estamos en local (localhost), iniciamos el servidor normalmente
     const startServer = async () => {
         await connectMongoDB();
         app.listen(ENVIRONMENT.PORT, () => {
