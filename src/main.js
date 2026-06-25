@@ -43,11 +43,16 @@ app.use('/api/stats', statsRouter);
 
 app.use(errorHandlerMiddleware);
 
-const startServer = async () => {
-    await connectMongoDB();
-    app.listen(ENVIRONMENT.PORT, () => {
-        console.log(`🌐 Servidor corriendo en http://localhost:${ENVIRONMENT.PORT}`);
-    });
-};
+if (process.env.VERCEL) {
+    connectMongoDB();
+} else {
+    const startServer = async () => {
+        await connectMongoDB();
+        app.listen(ENVIRONMENT.PORT, () => {
+            console.log(`🌐 Servidor corriendo en http://localhost:${ENVIRONMENT.PORT}`);
+        });
+    };
+    startServer();
+}
 
-startServer();
+export default app;

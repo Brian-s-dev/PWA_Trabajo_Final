@@ -64,8 +64,8 @@ class UserService {
         if (updateData.rol && updateData.rol === ROLES.SUPERADMIN && currentUser.rol !== ROLES.SUPERADMIN) {
             throw new ServerError('Solo un SUPERADMIN puede asignar el rol de SUPERADMIN', 403);
         }
-        
-        if (userToUpdate.rol === ROLES.SUPERADMIN && currentUser.rol !== ROLES.SUPERADMIN) {
+
+                if (userToUpdate.rol === ROLES.SUPERADMIN && currentUser.rol !== ROLES.SUPERADMIN) {
              throw new ServerError('No puedes modificar a un SUPERADMIN', 403);
         }
 

@@ -39,8 +39,8 @@ class UserController {
             const isHardDelete = request.query.hard === 'true';
 
             const result = await userService.deleteUser(id, request.user, isHardDelete);
-            
-            response.status(200).json({ ok: true, message: result.message });
+
+                        response.status(200).json({ ok: true, message: result.message });
         } catch (error) {
             next(error);
         }
