@@ -24,7 +24,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(cors({
-    maxAge: 86400 // Cache preflight requests for 24 hours
+    maxAge: 86400
 }));
 app.use(express.json());
 
@@ -35,9 +35,7 @@ app.get('/api/ping', (req, res) => {
 });
 
 if (process.env.VERCEL) {
-    // Middleware para asegurar la conexión en entornos Serverless
     app.use(async (req, res, next) => {
-        // readyState 1 significa conectado
         if (mongoose.connection.readyState !== 1) {
             await connectMongoDB();
         }
@@ -58,7 +56,6 @@ app.use('/api/stats', statsRouter);
 app.use(errorHandlerMiddleware);
 
 if (!process.env.VERCEL) {
-    // Si estamos en local (localhost), iniciamos el servidor normalmente
     const startServer = async () => {
         await connectMongoDB();
         app.listen(ENVIRONMENT.PORT, () => {
