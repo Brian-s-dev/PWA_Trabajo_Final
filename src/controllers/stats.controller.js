@@ -30,13 +30,23 @@ class StatsController {
                 ? 0
                 : Math.round((distribution[ENROLLMENT_STATUS.COMPLETADO] / totalEnrollments) * 100);
 
-            const criticalCourses = await Enrollment.aggregate([
+            const courseStats = await Enrollment.aggregate([
                 { $match: { activo: true } },
                 {
                     $group: {
                         _id: '$curso',
                         totalEnrollments: { $sum: 1 },
-                        completed: { $sum: { $cond: [{ $eq: ['$estado', ENROLLMENT_STATUS.COMPLETADO] }, 1, 0] } }
+                        completed: { $sum: { $cond: [{ $eq: ['$estado', ENROLLMENT_STATUS.COMPLETADO] }, 1, 0] } },
+                        inProgress: { $sum: { $cond: [{ $eq: ['$estado', ENROLLMENT_STATUS.EN_PROGRESO] }, 1, 0] } },
+                        completionTimeSum: {
+                            $sum: {
+                                $cond: [
+                                    { $eq: ['$estado', ENROLLMENT_STATUS.COMPLETADO] },
+                                    { $subtract: ['$updatedAt', '$createdAt'] },
+                                    0
+                                ]
+                            }
+                        }
                     }
                 },
                 { $lookup: { from: 'courses', localField: '_id', foreignField: '_id', as: 'cursoInfo' } },
@@ -46,17 +56,31 @@ class StatsController {
                         _id: 1,
                         titulo: '$cursoInfo.titulo',
                         totalEnrollments: 1,
+                        inProgress: 1,
+                        completed: 1,
                         completionRate: {
                             $cond: [
                                 { $eq: ['$totalEnrollments', 0] },
                                 0,
                                 { $round: [{ $multiply: [{ $divide: ['$completed', '$totalEnrollments'] }, 100] }, 1] }
                             ]
+                        },
+                        abandonmentRate: {
+                            $cond: [
+                                { $eq: ['$totalEnrollments', 0] },
+                                0,
+                                { $round: [{ $multiply: [{ $divide: ['$inProgress', '$totalEnrollments'] }, 100] }, 1] }
+                            ]
+                        },
+                        avgCompletionTime: {
+                            $cond: [
+                                { $eq: ['$completed', 0] },
+                                null,
+                                { $divide: ['$completionTimeSum', '$completed'] } // en milisegundos
+                            ]
                         }
                     }
-                },
-                { $sort: { totalEnrollments: -1 } },
-                { $limit: 5 }
+                }
             ]);
 
             const recentEmployees = await User.find({ rol: ROLES.EMPLOYEE })
@@ -71,7 +95,7 @@ class StatsController {
                     globalCompletionRate,
                     inProgress: distribution[ENROLLMENT_STATUS.EN_PROGRESO],
                     distribution,
-                    criticalCourses,
+                    criticalCourses: courseStats,
                     recentEmployees
                 }
             });
