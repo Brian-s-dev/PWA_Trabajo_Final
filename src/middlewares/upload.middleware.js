@@ -3,8 +3,10 @@ import path from 'path';
 import fs from 'fs';
 import { avatarStorage } from '../config/cloudinary.config.js';
 
+import os from 'os';
+
 // --- Almacenamiento local temporal para PDFs ---
-const pdfUploadDir = path.join(process.cwd(), 'uploads/temp_pdfs');
+const pdfUploadDir = path.join(os.tmpdir(), 'temp_pdfs');
 if (!fs.existsSync(pdfUploadDir)) {
     fs.mkdirSync(pdfUploadDir, { recursive: true });
 }
