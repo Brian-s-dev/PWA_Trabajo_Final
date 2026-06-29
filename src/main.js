@@ -13,6 +13,7 @@ import userRouter from './routes/user.router.js';
 import errorHandlerMiddleware from './middlewares/error.middleware.js';
 import moduleRouter from './routes/module.router.js';
 import statsRouter from './routes/stats.router.js';
+import aiRouter from './routes/ai.routes.js';
 
 if (ENVIRONMENT.MODE === 'development') {
     dns.setServers(['8.8.8.8', '8.8.4.4']);
@@ -52,6 +53,8 @@ app.use('/api/enrollments', enrollmentRouter);
 app.use('/api/users', userRouter);
 
 app.use('/api/stats', statsRouter);
+
+app.use('/api/ai', aiRouter);
 
 app.use(errorHandlerMiddleware);
 
