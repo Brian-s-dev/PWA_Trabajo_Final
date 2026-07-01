@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { avatarStorage } from '../config/cloudinary.config.js';
 import os from 'os';
+import ServerError from '../helpers/serverError.helper.js';
 
 // Hice un almacenamient temporar de los pds para que los tome la ia al momento de crear los cursos por ese medio.
 const pdfUploadDir = path.join(os.tmpdir(), 'temp_pdfs');
@@ -52,3 +53,27 @@ export const uploadAvatar = multer({
         fileSize: 5 * 1024 * 1024
     }
 });
+
+export const uploadPdfMiddleware = (request, response, next) => {
+    const upload = uploadPdf.single('pdf');
+    upload(request, response, function (err) {
+        if (err instanceof multer.MulterError) {
+            return next(new ServerError(`Error de subida: ${err.message}`, 400));
+        } else if (err) {
+            return next(new ServerError(err.message, 400));
+        }
+        next();
+    });
+};
+
+export const uploadAvatarMiddleware = (request, response, next) => {
+    const upload = uploadAvatar.single('avatar');
+    upload(request, response, function (err) {
+        if (err instanceof multer.MulterError) {
+            return next(new ServerError(`Error de subida: ${err.message}`, 400));
+        } else if (err) {
+            return next(new ServerError(err.message, 400));
+        }
+        next();
+    });
+};
