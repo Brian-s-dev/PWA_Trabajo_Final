@@ -1,15 +1,23 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
 import { createRequire } from 'module';
+<<<<<<< HEAD
+=======
+const require = createRequire(import.meta.url);
+const pdfParse = require('pdf-parse');
+>>>>>>> 77c3bf858dea030fe6c71294123b92721bdfba16
 import ENVIRONMENT from '../config/environment.config.js';
 import ServerError from '../helpers/serverError.helper.js';
 import courseService from '../services/course.service.js';
 import moduleService from '../services/module.service.js';
 
+<<<<<<< HEAD
 const require = createRequire(import.meta.url);
 const pdfParse = require('pdf-parse');
 
 // Controller de la ia para la creacion de cursos.
+=======
+>>>>>>> 77c3bf858dea030fe6c71294123b92721bdfba16
 class AiController {
     constructor() {
         this.genAI = new GoogleGenerativeAI(ENVIRONMENT.GEMINI_API_KEY);
@@ -53,7 +61,11 @@ class AiController {
             
             TEXTO DEL DOCUMENTO:
             """
+<<<<<<< HEAD
             ${textContent.substring(0, 30000)} // Limitador por las dudas.
+=======
+            ${textContent.substring(0, 30000)} // Limitamos un poco para no exceder tokens por las dudas, aunque Gemini soporta mucho más
+>>>>>>> 77c3bf858dea030fe6c71294123b92721bdfba16
             """
             `;
 
@@ -63,6 +75,10 @@ class AiController {
 
             let courseJson;
             try {
+<<<<<<< HEAD
+=======
+                // Limpiar posibles backticks de markdown que a veces Gemini incluye
+>>>>>>> 77c3bf858dea030fe6c71294123b92721bdfba16
                 const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
                 courseJson = JSON.parse(cleanJson);
             } catch (jsonErr) {
@@ -70,6 +86,10 @@ class AiController {
                 throw new ServerError('Error al procesar la respuesta de la IA. Por favor, intenta de nuevo.', 500);
             }
 
+<<<<<<< HEAD
+=======
+            // Eliminar el archivo PDF temporal
+>>>>>>> 77c3bf858dea030fe6c71294123b92721bdfba16
             fs.unlinkSync(pdfPath);
 
             response.status(200).json({
@@ -79,6 +99,10 @@ class AiController {
             });
 
         } catch (error) {
+<<<<<<< HEAD
+=======
+            // Limpieza en caso de error
+>>>>>>> 77c3bf858dea030fe6c71294123b92721bdfba16
             if (pdfPath && fs.existsSync(pdfPath)) {
                 fs.unlinkSync(pdfPath);
             }
