@@ -2,16 +2,9 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { avatarStorage } from '../config/cloudinary.config.js';
-<<<<<<< HEAD
 import os from 'os';
 
 // Hice un almacenamient temporar de los pds para que los tome la ia al momento de crear los cursos por ese medio.
-=======
-
-import os from 'os';
-
-// --- Almacenamiento local temporal para PDFs ---
->>>>>>> 77c3bf858dea030fe6c71294123b92721bdfba16
 const pdfUploadDir = path.join(os.tmpdir(), 'temp_pdfs');
 if (!fs.existsSync(pdfUploadDir)) {
     fs.mkdirSync(pdfUploadDir, { recursive: true });
@@ -39,19 +32,11 @@ export const uploadPdf = multer({
     storage: localPdfStorage,
     fileFilter: pdfFilter,
     limits: {
-<<<<<<< HEAD
-        fileSize: 10 * 1024 * 1024
-    }
-});
-
-// Config de Cloudinary para los avatares.
-=======
         fileSize: 10 * 1024 * 1024 // 10MB máximo
     }
 });
 
 // --- Almacenamiento en Cloudinary para Avatares ---
->>>>>>> 77c3bf858dea030fe6c71294123b92721bdfba16
 const imageFilter = (request, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
         cb(null, true);
@@ -64,6 +49,6 @@ export const uploadAvatar = multer({
     storage: avatarStorage,
     fileFilter: imageFilter,
     limits: {
-        fileSize: 5 * 1024 * 1024 
+        fileSize: 5 * 1024 * 1024
     }
 });
