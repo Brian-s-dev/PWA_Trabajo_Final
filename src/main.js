@@ -13,6 +13,7 @@ import userRouter from './routes/user.router.js';
 import errorHandlerMiddleware from './middlewares/error.middleware.js';
 import moduleRouter from './routes/module.router.js';
 import statsRouter from './routes/stats.router.js';
+import aiRouter from './routes/ai.routes.js';
 
 if (ENVIRONMENT.MODE === 'development') {
     dns.setServers(['8.8.8.8', '8.8.4.4']);
@@ -30,12 +31,12 @@ app.use(express.json());
 
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-app.get('/api/ping', (req, res) => {
-    res.status(200).json({ ok: true, mensaje: '🚀 API LMS Onboarding funcionando' });
+app.get('/api/ping', (request, response) => {
+    response.status(200).json({ ok: true, mensaje: '🚀 API LMS Onboarding funcionando' });
 });
 
 if (process.env.VERCEL) {
-    app.use(async (req, res, next) => {
+    app.use(async (request, response, next) => {
         if (mongoose.connection.readyState !== 1) {
             await connectMongoDB();
         }
@@ -52,6 +53,8 @@ app.use('/api/enrollments', enrollmentRouter);
 app.use('/api/users', userRouter);
 
 app.use('/api/stats', statsRouter);
+
+app.use('/api/ai', aiRouter);
 
 app.use(errorHandlerMiddleware);
 

@@ -7,10 +7,22 @@ import mailService from './mail.service.js';
 import { ROLES } from '../constants/roles.constant.js';
 
 class UserService {
+    /**
+     * Obtiene todos los usuarios basándose en filtros y paginación.
+     * @param {Object} query - Objeto con los parámetros de búsqueda de la URL.
+     * @returns {Promise<Array>} Lista de usuarios.
+     */
     async getAllUsers(query) {
         return await userRepository.findAllUsers(query);
     }
 
+    /**
+     * Crea un nuevo usuario manualmente. Solo para uso interno de administradores.
+     * @param {Object} userData - Datos del nuevo usuario (nombre, email, password, rol).
+     * @param {Object} currentUser - Usuario que ejecuta la acción (ADMIN o SUPERADMIN).
+     * @returns {Promise<Object>} El usuario creado (sin contraseña).
+     * @throws {ServerError} Si no tiene permisos, el usuario ya existe o intenta crear un rol superior.
+     */
     async createUser(userData, currentUser) {
         const { nombre, email, password, rol } = userData;
 
@@ -53,6 +65,14 @@ class UserService {
         return newUser;
     }
 
+    /**
+     * Actualiza la información de un usuario existente.
+     * @param {string} id - ID del usuario a modificar.
+     * @param {Object} updateData - Datos a actualizar.
+     * @param {Object} currentUser - Usuario que ejecuta la acción.
+     * @returns {Promise<Object>} El usuario actualizado.
+     * @throws {ServerError} Si no tiene permisos, el usuario no existe, o intenta modificar a un superior.
+     */
     async updateUser(id, updateData, currentUser) {
         if (currentUser.rol === ROLES.EMPLOYEE) {
             throw new ServerError('No tienes permisos', 403);
@@ -77,6 +97,14 @@ class UserService {
         return updatedUser;
     }
 
+    /**
+     * Elimina a un usuario, ya sea lógicamente (soft) o físicamente (hard).
+     * @param {string} id - ID del usuario a eliminar.
+     * @param {Object} currentUser - Usuario que ejecuta la acción.
+     * @param {boolean} [isHardDelete=false] - Indica si el borrado es definitivo en base de datos.
+     * @returns {Promise<Object>} Mensaje de confirmación de la eliminación.
+     * @throws {ServerError} Si no tiene permisos o intenta eliminarse a sí mismo o a un SUPERADMIN.
+     */
     async deleteUser(id, currentUser, isHardDelete = false) {
         if (currentUser.rol === ROLES.EMPLOYEE) {
             throw new ServerError('No tienes permisos para eliminar usuarios', 403);

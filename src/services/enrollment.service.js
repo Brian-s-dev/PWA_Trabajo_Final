@@ -9,6 +9,14 @@ import { ROLES } from '../constants/roles.constant.js';
 
 class EnrollmentService {
 
+    /**
+     * Asigna un curso a un empleado (inscribe al empleado).
+     * @param {string} employee_id - ID del empleado a inscribir.
+     * @param {string} course_id - ID del curso.
+     * @param {Object} user - Usuario administrador que realiza la acción.
+     * @returns {Promise<Object>} La inscripción creada o reactivada.
+     * @throws {ServerError} Si no hay permisos, el empleado no existe o el curso no existe.
+     */
     async assignCourse(employee_id, course_id, user) {
         if (user.rol !== ROLES.ADMIN && user.rol !== ROLES.SUPERADMIN) {
             throw new ServerError('Solo los administradores pueden asignar cursos', 403);
@@ -63,6 +71,14 @@ class EnrollmentService {
         return newEnrollment;
     }
 
+    /**
+     * Desasigna (da de baja lógicamente) a un empleado de un curso.
+     * @param {string} employee_id - ID del empleado.
+     * @param {string} course_id - ID del curso.
+     * @param {Object} user - Usuario administrador que realiza la acción.
+     * @returns {Promise<Object>} La inscripción actualizada a inactiva.
+     * @throws {ServerError} Si no hay permisos o la inscripción no existe.
+     */
     async unassignCourse(employee_id, course_id, user) {
         if (user.rol !== ROLES.ADMIN && user.rol !== ROLES.SUPERADMIN) {
             throw new ServerError('Solo los administradores pueden desasignar cursos', 403);
@@ -79,6 +95,12 @@ class EnrollmentService {
         return existingEnrollment;
     }
 
+    /**
+     * Obtiene todos los cursos en los que el usuario actual está inscrito,
+     * incluyendo el progreso de cada módulo.
+     * @param {Object} user - Usuario que realiza la consulta.
+     * @returns {Promise<Array>} Lista de inscripciones con el curso poblado y su progreso.
+     */
     async getMyCourses(user) {
         const enrollments = await enrollmentRepository.findByUserId(user.id);
         const results = [];
@@ -92,14 +114,33 @@ class EnrollmentService {
         return results;
     }
 
+    /**
+     * Obtiene todas las inscripciones asociadas a un curso específico.
+     * @param {string} course_id - ID del curso.
+     * @returns {Promise<Array>} Lista de inscripciones.
+     */
     async getEnrollmentsByCourse(course_id) {
         return await enrollmentRepository.findByCursoId(course_id);
     }
 
+    /**
+     * Obtiene todas las inscripciones de un empleado específico.
+     * @param {string} employee_id - ID del empleado.
+     * @returns {Promise<Array>} Lista de inscripciones.
+     */
     async getEnrollmentsByEmployee(employee_id) {
         return await enrollmentRepository.findByEmpleadoId(employee_id);
     }
 
+    /**
+     * Marca un módulo específico como completado para un usuario en un curso.
+     * También actualiza el estado general de la inscripción si todos los módulos se completan.
+     * @param {string} course_id - ID del curso.
+     * @param {string} module_id - ID del módulo a completar.
+     * @param {Object} user - Usuario que completa el módulo.
+     * @returns {Promise<Object>} La inscripción actualizada.
+     * @throws {ServerError} Si la inscripción, curso o módulo no existen.
+     */
     async markModuleCompleted(course_id, module_id, user) {
         const enrollment = await enrollmentRepository.findByUserAndCourse(user.id, course_id);
         if (!enrollment) throw new ServerError('Inscripción no encontrada', 404);

@@ -2,6 +2,13 @@ import transporter from '../config/mailer.config.js';
 import ENVIRONMENT from '../config/environment.config.js';
 
 class MailService {
+    /**
+     * Envía un correo electrónico de verificación de cuenta al usuario recién registrado.
+     * @param {string} email - Correo electrónico del destinatario.
+     * @param {string} nombre - Nombre del destinatario para personalizar el correo.
+     * @param {string} verificationUrl - URL con el token para verificar la cuenta.
+     * @returns {Promise<void>}
+     */
     async sendVerificationEmail(email, nombre, verificationUrl) {
         try {
             const mailOptions = {
@@ -25,6 +32,12 @@ class MailService {
         }
     }
 
+    /**
+     * Envía un correo electrónico con un enlace para restablecer la contraseña.
+     * @param {string} email - Correo electrónico del destinatario.
+     * @param {string} resetUrl - URL con el token temporal para restablecer contraseña.
+     * @returns {Promise<void>}
+     */
     async sendResetPasswordEmail(email, resetUrl) {
         try {
             const mailOptions = {

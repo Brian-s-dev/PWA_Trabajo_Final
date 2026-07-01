@@ -8,6 +8,14 @@ import { ROLES } from '../constants/roles.constant.js';
 
 class AuthService {
 
+    /**
+     * Registra un nuevo usuario en el sistema.
+     * @param {string} nombre - Nombre del usuario.
+     * @param {string} email - Correo electrónico del usuario.
+     * @param {string} password - Contraseña en texto plano.
+     * @returns {Promise<Object>} El usuario recién creado.
+     * @throws {ServerError} Si el usuario ya existe.
+     */
     async register(nombre, email, password) {
         const userExists = await userRepository.findUserByEmail(email);
         if (userExists) {
@@ -37,6 +45,13 @@ class AuthService {
         return newUser;
     }
 
+    /**
+     * Inicia sesión validando credenciales y genera un token JWT.
+     * @param {string} email - Correo electrónico del usuario.
+     * @param {string} password - Contraseña en texto plano.
+     * @returns {Promise<{user: Object, access_token: string}>} Objeto con el usuario y el token de acceso.
+     * @throws {ServerError} Si las credenciales son inválidas o el correo no está verificado.
+     */
     async login(email, password) {
         const user = await userRepository.findUserByEmail(email);
         if (!user) throw new ServerError("Credenciales inválidas", 404);
@@ -61,6 +76,12 @@ class AuthService {
         return { user, access_token };
     }
 
+    /**
+     * Verifica el correo electrónico del usuario mediante un token.
+     * @param {string} verification_token - Token JWT de verificación.
+     * @returns {Promise<Object>} El usuario actualizado.
+     * @throws {ServerError} Si el token es inválido o el usuario no existe.
+     */
     async verifyEmail(verification_token) {
         if (!verification_token) throw new ServerError("Falta el token de verificación", 400);
 
@@ -76,6 +97,12 @@ class AuthService {
         return user;
     }
 
+    /**
+     * Inicia el proceso de recuperación de contraseña enviando un correo con el token.
+     * @param {string} email - Correo electrónico del usuario.
+     * @returns {Promise<void>}
+     * @throws {ServerError} Si el usuario no existe.
+     */
     async forgotPassword(email) {
         const user = await userRepository.findUserByEmail(email);
         if (!user) throw new ServerError("Usuario no encontrado", 404);
@@ -95,6 +122,13 @@ class AuthService {
         }
     }
 
+    /**
+     * Restablece la contraseña del usuario utilizando un token válido.
+     * @param {string} reset_token - Token JWT de restablecimiento.
+     * @param {string} new_password - Nueva contraseña en texto plano.
+     * @returns {Promise<Object>} El usuario actualizado.
+     * @throws {ServerError} Si el token es inválido o falta.
+     */
     async resetPassword(reset_token, new_password) {
         if (!reset_token) throw new ServerError("Falta el token de restablecimiento", 400);
 
@@ -113,6 +147,13 @@ class AuthService {
         return user;
     }
 
+    /**
+     * Actualiza la información del usuario autenticado.
+     * @param {string} id - ID del usuario.
+     * @param {Object} updateData - Datos a actualizar.
+     * @returns {Promise<Object>} El usuario actualizado sin la contraseña.
+     * @throws {ServerError} Si se intenta actualizar el email o el usuario no existe.
+     */
     async updateMe(id, updateData) {
         const user = await userRepository.findUserById(id);
         if (!user) throw new ServerError("Usuario no encontrado", 404);
@@ -133,6 +174,13 @@ class AuthService {
         return safeUser;
     }
 
+    /**
+     * Actualiza el avatar del usuario.
+     * @param {string} id - ID del usuario.
+     * @param {string} avatarUrl - URL del nuevo avatar.
+     * @returns {Promise<Object>} El usuario actualizado sin la contraseña.
+     * @throws {ServerError} Si el usuario no existe.
+     */
     async updateAvatar(id, avatarUrl) {
         const user = await userRepository.findUserById(id);
         if (!user) throw new ServerError("Usuario no encontrado", 404);

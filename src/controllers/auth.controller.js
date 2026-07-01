@@ -86,7 +86,7 @@ class AuthController {
                 return response.status(400).json({ ok: false, message: 'No se subió ninguna imagen' });
             }
 
-            const avatarUrl = `/uploads/avatars/${request.file.filename}`;
+            const avatarUrl = request.file.path;
 
             const updatedUser = await authService.updateAvatar(request.user.id, avatarUrl);
 

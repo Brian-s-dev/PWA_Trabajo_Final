@@ -8,15 +8,37 @@ const courseRouter = express.Router();
 
 courseRouter.use(authMiddleware);
 
-courseRouter.get('/', courseController.getAllCourses);
-courseRouter.post('/', courseController.createCourse);
+courseRouter.get(
+    '/',
+    courseController.getAllCourses
+);
+courseRouter.post(
+    '/',
+    courseController.createCourse
+);
 
-courseRouter.get('/:id', verifyCourseExists, courseController.getCourseById);
+courseRouter.get(
+    '/:id',
+    verifyCourseExists,
+    courseController.getCourseById
+);
 
-courseRouter.put('/:id', verifyCourseExists, courseController.updateCourse);
+courseRouter.put(
+    '/:id',
+    verifyCourseExists,
+    courseController.updateCourse
+);
 
-courseRouter.delete('/:id', verifyCourseExists, courseController.deleteCourse);
+courseRouter.delete(
+    '/:id',
+    verifyCourseExists,
+    courseController.deleteCourse
+);
 
-courseRouter.use('/:course_id/modules', verifyCourseExists, moduleRouter);
+courseRouter.use(
+    '/:course_id/modules',
+    verifyCourseExists,
+    moduleRouter
+);
 
 export default courseRouter;

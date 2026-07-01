@@ -1,24 +1,43 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { avatarStorage } from '../config/cloudinary.config.js';
+import os from 'os';
 
-const uploadDir = path.join(process.cwd(), 'uploads/avatars');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+// Hice un almacenamient temporar de los pds para que los tome la ia al momento de crear los cursos por ese medio.
+const pdfUploadDir = path.join(os.tmpdir(), 'temp_pdfs');
+if (!fs.existsSync(pdfUploadDir)) {
+    fs.mkdirSync(pdfUploadDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
+const localPdfStorage = multer.diskStorage({
     destination: function (request, file, cb) {
-        cb(null, uploadDir);
+        cb(null, pdfUploadDir);
     },
     filename: function (request, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const ext = path.extname(file.originalname);
-        cb(null, 'avatar-' + request.user.id + '-' + uniqueSuffix + ext);
+        cb(null, 'temp-pdf-' + uniqueSuffix + '.pdf');
     }
 });
 
-const fileFilter = (request, file, cb) => {
+const pdfFilter = (request, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+        cb(null, true);
+    } else {
+        cb(new Error('Formato de archivo no soportado. Solo se permiten PDFs.'), false);
+    }
+};
+
+export const uploadPdf = multer({
+    storage: localPdfStorage,
+    fileFilter: pdfFilter,
+    limits: {
+        fileSize: 10 * 1024 * 1024
+    }
+});
+
+// Config de Cloudinary para los avatares.
+const imageFilter = (request, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
         cb(null, true);
     } else {
@@ -27,8 +46,8 @@ const fileFilter = (request, file, cb) => {
 };
 
 export const uploadAvatar = multer({
-    storage: storage,
-    fileFilter: fileFilter,
+    storage: avatarStorage,
+    fileFilter: imageFilter,
     limits: {
         fileSize: 5 * 1024 * 1024 
     }

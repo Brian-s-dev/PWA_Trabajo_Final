@@ -10,9 +10,21 @@ userRouter.use(authMiddleware);
 
 userRouter.use(roleMiddleware([ROLES.ADMIN, ROLES.SUPERADMIN]));
 
-userRouter.get('/', userController.getAllUsers);
-userRouter.post('/', userController.createUser);
-userRouter.put('/:id', userController.updateUser);
-userRouter.delete('/:id', userController.deleteUser);
+userRouter.get(
+    '/',
+    userController.getAllUsers
+);
+userRouter.post(
+    '/',
+    userController.createUser
+);
+userRouter.put(
+    '/:id',
+    userController.updateUser
+);
+userRouter.delete(
+    '/:id',
+    userController.deleteUser
+);
 
 export default userRouter;

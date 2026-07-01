@@ -6,6 +6,24 @@ import { ROLES } from '../constants/roles.constant.js';
 
 const statsRouter = express.Router();
 
-statsRouter.get('/admin', authMiddleware, roleMiddleware([ROLES.ADMIN, ROLES.SUPERADMIN]), statsController.getAdminStats);
+statsRouter.get(
+    '/admin',
+    authMiddleware,
+    roleMiddleware([ROLES.ADMIN, ROLES.SUPERADMIN]),
+    statsController.getAdminStats
+);
+
+statsRouter.get(
+    '/course/:courseId',
+    authMiddleware,
+    roleMiddleware([ROLES.ADMIN, ROLES.SUPERADMIN]),
+    statsController.getCourseAnalytics
+);
+statsRouter.get(
+    '/user/:userId',
+    authMiddleware,
+    roleMiddleware([ROLES.ADMIN, ROLES.SUPERADMIN]),
+    statsController.getUserAnalytics
+);
 
 export default statsRouter;
